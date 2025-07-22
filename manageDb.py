@@ -22,3 +22,23 @@ def addItemToTable(data, table_name):
         """, (data['title'], '', 'not done')
     )
     connect.commit()
+
+
+def retrieveItems():
+    tasks = cursor.execute("""
+        SELECT * FROM tasks
+    """).fetchall()
+    print(tasks)
+    return tasks
+
+def deleteItemFromDb(id):
+    cursor.execute(f"""
+        DELETE FROM tasks WHERE id={id}
+    """)
+
+    connect.commit()
+
+
+def updateItem(status, id):
+    cursor.execute(f"""UPDATE tasks SET status = '{status}' WHERE id={id} """)
+    connect.commit()

@@ -1,20 +1,14 @@
 import sys
 from PySide6 import QtWidgets
-from manageDb import createTable, addItemToTable
-tasks = [
-    "hello",
-    "welcome",
-    "Sohaib",
-    "yahya"
-]
+from manageDb import createTable, updateItem, addItemToTable, retrieveItems, deleteItemFromDb
 
 
 class TaskCard(QtWidgets.QWidget):
-    def __init__(self, card_title: str):
+    def __init__(self, card_title: str, itemId):
         super().__init__()   # VERY IMPORTANT
         # Main vertical layout
         self.card = QtWidgets.QVBoxLayout(self)
-
+        self.itemId=itemId
         # Title
         self.taskTitle = QtWidgets.QLabel(card_title)
         self.card.addWidget(self.taskTitle)
@@ -30,17 +24,23 @@ class TaskCard(QtWidgets.QWidget):
         self.card.addLayout(self.cardAction)
 
         self.deleteBtn.clicked.connect(self.deleteItem)
+        self.doneBtn.clicked.connect(self.updateItem)
 
     def deleteItem(self):
-        # This will remove the widget from its parent layout and delete it
+        deleteItemFromDb(self.itemId)
+        
         self.setParent(None)
+    def updateItem(self):
+        updateItem('Done', self.itemId)
+        
+        
 
 
 class MyWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         createTable(table_name="tasks")
-        self.tasks = tasks
+        
 
         self.titleField = QtWidgets.QPlainTextEdit(placeholderText="Title For Task")
         self.createTaskBtn = QtWidgets.QPushButton("Create Task")
@@ -58,8 +58,10 @@ class MyWidget(QtWidgets.QWidget):
         self.showTasks()
 
     def showTasks(self):
+        self.tasks = retrieveItems()
+        print(self.tasks)
         for task in self.tasks:
-            tsk = TaskCard(task)
+            tsk = TaskCard(task[1], task[0])
             self.rightLayout.addWidget(tsk)
 
     def clean_layout(self, layout):
